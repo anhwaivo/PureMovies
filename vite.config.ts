@@ -55,7 +55,8 @@ export default defineConfig(({ command }) => ({
                 name: "Cuki's PureMovie",
                 namespace: "Hth4nh",
                 homepageURL: "https://github.com/Hth4nh/PureMovies",
-                icon: "https://vitejs.dev/logo.svg",
+                icon:
+                    "https://www.google.com/s2/favicons?sz=64&domain=kkphim.com",
                 match: [...kkphimMatch, ...nguoncMatch, ...ophimMatch],
                 connect: connect,
                 grant: ["GM.xmlHttpRequest"],
