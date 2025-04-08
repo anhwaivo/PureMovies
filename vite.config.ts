@@ -54,6 +54,8 @@ export default defineConfig(({ command }) => ({
             userscript: {
                 name: "Cuki's PureMovie",
                 namespace: "Hth4nh",
+                description:
+                    `Cuki's PureMovie là một user-script hoàn hảo dành cho những ai yêu thích trải nghiệm xem phim liền mạch, không bị gián đoạn bởi quảng cáo "lậu" trong phim. Hy vọng sẽ mang đến cảm giác thoải mái và tập trung, giúp bạn tận hưởng từng khoảnh khắc của bộ phim một cách trọn vẹn nhất.`,
                 homepageURL: "https://github.com/Hth4nh/PureMovies",
                 icon:
                     "https://www.google.com/s2/favicons?sz=64&domain=kkphim.com",
@@ -70,9 +72,13 @@ export default defineConfig(({ command }) => ({
                 metaFileName: true,
                 externalGlobals: {
                     "@trim21/gm-fetch": cdn.jsdelivr("GM_fetch"),
-                    "hls.js": cdn.jsdelivr("Hls"),
+                    "hls.js": cdn.jsdelivr(
+                        "(() => {try { return Hls } catch(e) { return null }})()",
+                    ),
                     "notyf": cdn.jsdelivr("{Notyf}"),
-                    "artplayer": cdn.jsdelivr("Artplayer"),
+                    "artplayer": cdn.jsdelivr(
+                        "(() => {try { return Artplayer } catch(e) { return null }})()",
+                    ),
                 },
             },
             format: {

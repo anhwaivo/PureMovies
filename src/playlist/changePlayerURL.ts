@@ -2,6 +2,7 @@ import Hls from "hls.js";
 import { createPlayer, getPlaylistURL, removeAds } from ".";
 import { instances } from "../misc/state";
 import { unrestrictedFetch } from "../network";
+import { remoteImport } from "../misc/remoteImport";
 
 const originalFetch = window.fetch;
 
@@ -21,6 +22,13 @@ export async function changePlayerURL(embedUrl: string | URL) {
 
     let playlistUrl = await getPlaylistURL(embedUrl);
     playlistUrl = await removeAds(playlistUrl);
+
+    try {
+        if (!Hls) throw "";
+    } catch (e) {
+        console.warn("Hls not found. Run workaround...");
+        await remoteImport("https://cdn.jsdelivr.net/npm/hls.js");
+    }
 
     // Change url
     if (Hls.isSupported()) {
