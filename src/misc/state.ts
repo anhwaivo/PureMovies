@@ -1,4 +1,4 @@
-import { GM } from "$";
+import { GM_info } from "$";
 import type { GmInfoScriptType } from "$";
 import type { Notyf } from "notyf";
 import type Artplayer from "artplayer";
@@ -11,7 +11,7 @@ interface ExtraConfig {
 }
 
 export const config: GmInfoScriptType & ExtraConfig = {
-    ...GM.info.script,
+    ...GM_info.script,
 
     betWarning:
         "Hành vi cá cược, cờ bạc online <b>LÀ VI PHẠM PHÁP LUẬT</b><br>theo Điều 321 Bộ luật Hình sự 2015 (sửa đổi, bổ sung 2017)",
