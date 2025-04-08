@@ -57,6 +57,10 @@ export default defineConfig(({ command }) => ({
                 homepageURL: "https://github.com/Hth4nh/PureMovies",
                 icon:
                     "https://www.google.com/s2/favicons?sz=64&domain=kkphim.com",
+                updateURL:
+                    "https://hth4nh.github.io/PureMovies/puremovies.meta.js",
+                downloadURL:
+                    "https://hth4nh.github.io/PureMovies/puremovies.user.js",
                 match: [...kkphimMatch, ...nguoncMatch, ...ophimMatch],
                 connect: connect,
                 grant: ["GM.xmlHttpRequest"],
