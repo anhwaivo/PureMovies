@@ -1,0 +1,74 @@
+.debug {
+    .cuki-player-container {
+        outline: 1rem solid cyan;
+    }
+}
+
+.cuki-player-container {
+    background: black;
+
+    width: 100%;
+    max-height: min(70vh, calc(100vh - 40px - 4rem));
+    aspect-ratio: 16/9;
+    overflow: hidden;
+}
+
+.art-video-player {
+    &.art-mini-progress-bar,
+    &.art-lock {
+        .art-bottom {
+            .art-controls {
+                transform: none !important;
+                max-height: 0 !important;
+                margin-top: calc(-1 * var(--art-bottom-gap)) !important;
+            }
+            .art-progress {
+                transform: translateY(0) !important;
+            }
+        }
+    }
+}
+
+.art-controls {
+    height: initial !important;
+    max-height: 150% !important;
+    flex-wrap: wrap !important;
+    margin-top: 10px !important;
+    transition-property: all !important;
+
+    .art-controls-left,
+    .art-controls-right {
+        height: initial !important;
+        max-height: 150% !important;
+    }
+
+    > * {
+        margin-top: -10px !important;
+    }
+}
+
+.art-controls-right {
+    margin-left: auto !important;
+}
+
+.art-controls-left > :first-of-type::after {
+    left: 100% !important;
+}
+
+.art-controls-right > :last-of-type::after {
+    left: 0% !important;
+}
+
+.art-control-fast-rewind,
+.art-control-fast-forward,
+.art-control-noadserror {
+    > svg {
+        width: 20px;
+    }
+}
+
+.art-control-noadserror {
+    > svg {
+        fill: #ffcc00 !important;
+    }
+}

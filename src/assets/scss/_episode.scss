@@ -1,0 +1,8 @@
+a.text-gray-50.bg-gray-400.shadow-md.rounded.py-1 {
+    transition: 0.5s;
+
+    &.cuki-episode-current {
+        transform: rotate(180deg) scaleY(-1) scaleX(-1);
+        filter: invert(1);
+    }
+}
