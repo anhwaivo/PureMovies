@@ -5,8 +5,29 @@ import forwardIconURL from "../assets/icons/forward.svg";
 import Artplayer from "artplayer";
 import { config, instances } from "../misc/state";
 import { getSvgMarkupFromDataUrl } from "../misc/getSvgMarkupFromDataUrl";
+import { createNotification } from "../ui";
+import { remoteImport } from "../misc/remoteImport";
 
-export function createPlayer(playlistUrl: string | URL = "") {
+export async function createPlayer(playlistUrl: string | URL = "") {
+    try {
+        if (!Artplayer) throw "";
+    } catch (e) {
+        console.warn("Artplayer not found. Run workaround...");
+        instances.notification ??= await createNotification();
+
+        instances.notification?.open({
+            type: "warning",
+            message: "Artplayer not found. Run workaround...",
+        });
+
+        // @ts-expect-error
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/artplayer",
+            "Artplayer",
+        );
+        eval("Artplayer = window.tmp;");
+    }
+
     return new Artplayer({
         container: ".cuki-player-container",
         url: (playlistUrl === "") ? "" : new URL(playlistUrl).href,

@@ -1,5 +1,8 @@
 import { unsafeWindow } from "$";
 import GM_fetch from "@trim21/gm-fetch";
+import { remoteImport } from "../misc/remoteImport";
+import { createNotification } from "../ui";
+import { instances } from "../misc/state";
 
 /**
  * Performs a fetch request using `GM_fetch` to potentially bypass CORS.
@@ -30,6 +33,25 @@ export async function unrestrictedFetch(
     input: RequestInfo | URL,
     options: RequestInit = {},
 ): Promise<Response> {
+    try {
+        if (!GM_fetch) throw "";
+    } catch (e) {
+        console.warn("GM_fetch not found. Run workaround...");
+        instances.notification ??= await createNotification();
+
+        instances.notification?.open({
+            type: "warning",
+            message: "GM_fetch not found. Run workaround...",
+        });
+
+        // @ts-expect-error
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/@trim21/gm-fetch",
+            "GM_fetch",
+        );
+        eval("GM_fetch = window.tmp;");
+    }
+
     if (typeof input === "string") {
         // Parse the input URL
         input = new URL(input);

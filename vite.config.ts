@@ -1,6 +1,18 @@
 import { defineConfig } from "vite";
 import monkey, { cdn } from "vite-plugin-monkey";
 
+function tryCatchWrapper(variableName) {
+    return `
+    (() => {
+        try {
+            return ${variableName}
+        }
+        catch(e) {
+            return null;
+        }
+    })()`;
+}
+
 const kkphimMatch = [
     "https://kkphim.com/*",
     "https://kkphim.vip/*",
@@ -71,14 +83,12 @@ export default defineConfig(({ command }) => ({
             build: {
                 metaFileName: true,
                 externalGlobals: {
-                    "@trim21/gm-fetch": cdn.jsdelivr("GM_fetch"),
-                    "hls.js": cdn.jsdelivr(
-                        "(() => {try { return Hls } catch(e) { return null }})()",
+                    "@trim21/gm-fetch": cdn.jsdelivr(
+                        tryCatchWrapper("GM_fetch"),
                     ),
-                    "notyf": cdn.jsdelivr("{Notyf}"),
-                    "artplayer": cdn.jsdelivr(
-                        "(() => {try { return Artplayer } catch(e) { return null }})()",
-                    ),
+                    "hls.js": cdn.jsdelivr(tryCatchWrapper("Hls")),
+                    "notyf": cdn.jsdelivr(tryCatchWrapper("{Notyf}")),
+                    "artplayer": cdn.jsdelivr(tryCatchWrapper("Artplayer")),
                 },
             },
             format: {

@@ -3,6 +3,7 @@ import { createPlayer, getPlaylistURL, removeAds } from ".";
 import { instances } from "../misc/state";
 import { unrestrictedFetch } from "../network";
 import { remoteImport } from "../misc/remoteImport";
+import { createNotification } from "../ui";
 
 const originalFetch = window.fetch;
 
@@ -18,7 +19,7 @@ window.fetch = function (...args) {
 
 export async function changePlayerURL(embedUrl: string | URL) {
     instances.player?.destroy();
-    instances.player = createPlayer();
+    instances.player = await createPlayer();
 
     let playlistUrl = await getPlaylistURL(embedUrl);
     playlistUrl = await removeAds(playlistUrl);
@@ -27,7 +28,19 @@ export async function changePlayerURL(embedUrl: string | URL) {
         if (!Hls) throw "";
     } catch (e) {
         console.warn("Hls not found. Run workaround...");
-        await remoteImport("https://cdn.jsdelivr.net/npm/hls.js");
+        instances.notification ??= await createNotification();
+
+        instances.notification?.open({
+            type: "warning",
+            message: "Hls not found. Run workaround...",
+        });
+
+        // @ts-expect-error
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/hls.js",
+            "Hls",
+        );
+        eval("Hls = window.tmp;");
     }
 
     // Change url
