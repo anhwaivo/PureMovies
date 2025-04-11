@@ -1,4 +1,4 @@
-<h1><img src="https://github.com/user-attachments/assets/3da9aa42-3981-420a-97d7-02f73b8f76c0" alt="icon" style="vertical-align: middle; width: 60px; height: 60px; margin-right: 5px;"> Cuki's PureMovie</h1>
+<h1><img src="https://github.com/user-attachments/assets/3da9aa42-3981-420a-97d7-02f73b8f76c0" alt="icon" style="vertical-align: middle; width: 60px; height: 60px; margin-right: 5px;">&nbsp; &nbsp;Cuki's PureMovie</h1>
 
 Cuki's PureMovie là một userscript hoàn hảo dành cho những ai yêu thích trải nghiệm xem phim liền mạch, không bị gián đoạn bởi quảng cáo "lậu" trong phim. Hy vọng sẽ mang đến cảm giác thoải mái và tập trung, giúp bạn tận hưởng từng khoảnh khắc của bộ phim một cách trọn vẹn nhất.
 
