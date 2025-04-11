@@ -1,4 +1,3 @@
-import { unsafeWindow } from "$";
 import GM_fetch from "@trim21/gm-fetch";
 import { remoteImport } from "../misc/remoteImport";
 import { createNotification } from "../ui";
