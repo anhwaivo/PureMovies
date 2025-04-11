@@ -7,14 +7,23 @@ import { createNotification } from "../ui";
 
 const originalFetch = window.fetch;
 
-window.fetch = function (...args) {
-    if (
-        new Error().stack?.includes("loadSource") ||
-        new Error().stack?.includes("loadFragment")
-    ) {
-        return unrestrictedFetch(...args);
+window.fetch = function (input, init) {
+    const url = (input as Request).url ?? (input as URL).href ?? input;
+    const hostname = new URL(url).hostname;
+
+    const isNeedToBypass = ["phim1280", "opstream"].every((keyword) =>
+        hostname.includes(keyword) === false
+    );
+
+    const isUsingByHls = ["loadSource", "loadFragment"].some((functionName) =>
+        new Error().stack?.includes(functionName)
+    );
+
+    if (isNeedToBypass && isUsingByHls) {
+        return unrestrictedFetch(input, init);
     }
-    return originalFetch(...args);
+
+    return originalFetch(input, init);
 };
 
 export async function changePlayerURL(embedUrl: string | URL) {

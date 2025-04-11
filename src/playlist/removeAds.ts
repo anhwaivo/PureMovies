@@ -12,12 +12,18 @@ export async function removeAds(playlistUrl: string | URL) {
         return caches.blob[playlistUrl.href];
     }
 
+    const isNoNeedToBypass = ["phim1280", "opstream"].some((keyword) =>
+        playlistUrl.hostname.includes(keyword)
+    );
+
     // Fetch the content of the URL
-    let req = await unrestrictedFetch(playlistUrl, {
-        headers: {
-            Referer: playlistUrl.origin,
-        },
-    });
+    let req = isNoNeedToBypass
+        ? await fetch(playlistUrl)
+        : await unrestrictedFetch(playlistUrl, {
+            headers: {
+                Referer: playlistUrl.origin,
+            },
+        });
 
     let playlist = await req.text();
 
