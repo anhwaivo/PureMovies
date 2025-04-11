@@ -1,5 +1,3 @@
-import { unrestrictedFetch } from "../network";
-
 export async function getPlaylistURL(embedUrl: string | URL) {
     // Parse the input URL
     embedUrl = new URL(embedUrl);
@@ -9,7 +7,7 @@ export async function getPlaylistURL(embedUrl: string | URL) {
     }
 
     if (embedUrl.hostname.includes("opstream")) {
-        const req = await unrestrictedFetch(embedUrl);
+        const req = await fetch(embedUrl);
         const raw = await req.text();
 
         const playlistUrl = raw.match(/(?<=const url = ").*(?=";)/)?.[0];
