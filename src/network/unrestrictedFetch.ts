@@ -33,25 +33,6 @@ export async function unrestrictedFetch(
     input: RequestInfo | URL,
     options: RequestInit = {},
 ): Promise<Response> {
-    try {
-        if (!GM_fetch) throw "";
-    } catch (e) {
-        console.warn("GM_fetch not found. Run workaround...");
-        instances.notification ??= await createNotification();
-
-        instances.notification?.open({
-            type: "warning",
-            message: "GM_fetch not found. Run workaround...",
-        });
-
-        // @ts-expect-error
-        window.tmp = await remoteImport(
-            "https://cdn.jsdelivr.net/npm/@trim21/gm-fetch",
-            "GM_fetch",
-        );
-        eval("GM_fetch = window.tmp;");
-    }
-
     if (typeof input === "string") {
         // Parse the input URL
         input = new URL(input);
@@ -65,7 +46,7 @@ export async function unrestrictedFetch(
     // Use native fetch for local URL schemes not requiring network/CORS.
     if (protocol === "blob:" || protocol === "data:") {
         // Pass the original input to native fetch
-        return unsafeWindow.fetch(input, options);
+        return fetch(input, options);
     }
 
     // Determine the raw URL string (including potential Kodi headers)
@@ -116,6 +97,26 @@ export async function unrestrictedFetch(
         ...kodiStyleHeaders,
         ...options.headers,
     };
+
+    // Workaround: Download GM_fetch if is not found
+    try {
+        if (!GM_fetch) throw "";
+    } catch (e) {
+        console.warn("GM_fetch not found. Run workaround...");
+        instances.notification ??= await createNotification();
+
+        instances.notification?.open({
+            type: "warning",
+            message: "GM_fetch not found. Run workaround...",
+        });
+
+        // @ts-expect-error
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/@trim21/gm-fetch",
+            "GM_fetch",
+        );
+        eval("GM_fetch = window.tmp;");
+    }
 
     // Call GM_fetch with the processed URL and merged options/headers.
     return GM_fetch(requestUrl, {
