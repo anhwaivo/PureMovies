@@ -1,3 +1,13 @@
+URL.parse ??= (url, base) => {
+    try {
+        return new URL(url, base);
+    }
+    catch (e) {
+        console.error(e);
+        return null;
+    }
+};
+
 import "./assets/scss/main.scss";
 import { isHostnameContains } from "./network";
 
