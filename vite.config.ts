@@ -41,6 +41,16 @@ const ophimMatch = [
 
 const connect = [
     "phim1280.tv",
+    "kkphimplayer.com",
+    "kkphimplayer1.com",
+    "kkphimplayer2.com",
+    "kkphimplayer3.com",
+    "kkphimplayer4.com",
+    "kkphimplayer5.com",
+    "kkphimplayer6.com",
+    "kkphimplayer7.com",
+    "kkphimplayer8.com",
+    "kkphimplayer9.com",
     "streamc.xyz",
     "opstream10.com",
     "opstream11.com",

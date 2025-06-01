@@ -11,7 +11,7 @@ window.fetch = function (input, init) {
     const url = (input as Request).url ?? (input as URL).href ?? input;
     const hostname = new URL(url).hostname;
 
-    const isNeedToBypass = ["phim1280", "opstream"].every((keyword) =>
+    const isNeedToBypass = ["kkphimplayer", "phim1280", "opstream"].every((keyword) =>
         hostname.includes(keyword) === false
     );
 
