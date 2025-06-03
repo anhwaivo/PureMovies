@@ -1,22 +1,28 @@
+import { config } from "../misc/state";
+
 export async function getPlaylistURL(embedUrl: string | URL) {
     // Parse the input URL
     embedUrl = new URL(embedUrl);
 
-    if (embedUrl.hostname.includes("phimapi")) {
+    if (embedUrl.hostname.includes("phimapi") && embedUrl.searchParams.has("url")) {
         return embedUrl.searchParams.get("url") ?? "";
     }
 
-    if (embedUrl.hostname.includes("opstream")) {
-        const req = await fetch(embedUrl);
-        const raw = await req.text();
+    const isNoNeedToBypass = config.domainBypassWhitelist.some((keyword) =>
+        embedUrl.hostname.includes(keyword)
+    );
 
-        const playlistUrl = raw.match(/(?<=const url = ").*(?=";)/)?.[0];
-        return URL.parse(String(playlistUrl), embedUrl)?.href || "";
-    }
+    // Fetch the content of the URL
+    const req = isNoNeedToBypass
+        ? await fetch(embedUrl)
+        : await unrestrictedFetch(embedUrl, {
+            headers: {
+                Referer: embedUrl.origin,
+            },
+        });
 
-    if (embedUrl.hostname.includes("streamc")) {
-        return embedUrl.toString().replace("embed.php", "get.php");
-    }
+    const raw = await req.text();
 
-    return embedUrl.href;
+    const playlistUrl = raw.match(/(?<=(?:url =|file:) ").*(?="(?:;|,))/)?.[0];
+    return URL.parse(String(playlistUrl), embedUrl)?.href || "";
 }
