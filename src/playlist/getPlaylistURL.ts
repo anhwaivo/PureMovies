@@ -1,4 +1,5 @@
 import { config } from "../misc/state";
+import { unrestrictedFetch } from "../network";
 
 export async function getPlaylistURL(embedUrl: string | URL) {
     // Parse the input URL
