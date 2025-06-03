@@ -1,6 +1,6 @@
 import Hls from "hls.js";
 import { createPlayer, getPlaylistURL, removeAds } from ".";
-import { instances } from "../misc/state";
+import { config, instances } from "../misc/state";
 import { unrestrictedFetch } from "../network";
 import { remoteImport } from "../misc/remoteImport";
 import { createNotification } from "../ui";
@@ -11,7 +11,7 @@ window.fetch = function (input, init) {
     const url = (input as Request).url ?? (input as URL).href ?? input;
     const hostname = new URL(url).hostname;
 
-    const isNeedToBypass = ["kkphimplayer", "phim1280", "opstream"].every((keyword) =>
+    const isNeedToBypass = config.domainBypassWhitelist.every((keyword) =>
         hostname.includes(keyword) === false
     );
 

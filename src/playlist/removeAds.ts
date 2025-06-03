@@ -12,7 +12,7 @@ export async function removeAds(playlistUrl: string | URL) {
         return caches.blob[playlistUrl.href];
     }
 
-    const isNoNeedToBypass = ["phim1280", "opstream"].some((keyword) =>
+    const isNoNeedToBypass = config.domainBypassWhitelist.some((keyword) =>
         playlistUrl.hostname.includes(keyword)
     );
 
