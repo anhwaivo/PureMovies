@@ -1,9 +1,9 @@
-import { isHostnameContains } from "../network";
+export function getExceptionDuration(url: string | URL) {
+    url = new URL(url);
 
-export function getExceptionDuration() {
-    if (isHostnameContains("ophim", "opstream")) {
+    if (["ophim", "opstream"].some((keyword) => url.hostname.includes(keyword))) {
         return 600;
-    } else if (isHostnameContains("nguonc", "streamc")) {
+    } else if (["nguonc", "streamc"].some((keyword) => url.hostname.includes(keyword))) {
         return +Infinity;
     } else {
         return 900;

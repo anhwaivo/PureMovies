@@ -3,6 +3,34 @@ import { unrestrictedFetch } from "../network";
 import { injectReportButton } from "../ui";
 import { getExceptionDuration, getTotalDuration, isContainAds } from ".";
 
+async function getOphimAdsBlockWorkaroundRegex() {
+    // Parse the URL
+    let playlistUrl = new URL("https://vip.opstream90.com/20250529/6593_07659334/3000k/hls/mixed.m3u8");
+
+    const isNoNeedToBypass = config.domainBypassWhitelist.some((keyword) =>
+        playlistUrl.hostname.includes(keyword)
+    );
+
+    // Fetch the content of the URL
+    let req = isNoNeedToBypass
+        ? await fetch(playlistUrl)
+        : await unrestrictedFetch(playlistUrl, {
+            headers: {
+                Referer: playlistUrl.origin,
+            },
+        });
+
+    let playlist = await req.text();
+
+    const adsText = playlist.split("\n").slice(318, -48).join("\n");
+    const escapedAdsText = adsText.replace(/\./g, "\\.").replace(/\n/g, "\\n");
+    const regexString = escapedAdsText.replace(/[a-z0-9]{32}\\\.ts/g, ".*")
+
+    return new RegExp(regexString, "g");
+}
+
+let workaroundRegex: RegExp | null = null;
+
 export async function removeAds(playlistUrl: string | URL) {
     // Parse the input URL
     playlistUrl = new URL(playlistUrl);
@@ -58,7 +86,14 @@ export async function removeAds(playlistUrl: string | URL) {
         playlist = config.adsRegexList.reduce((playlist, regex) => {
             return playlist.replaceAll(regex, "");
         }, playlist);
-    } else if (getTotalDuration(playlist) > getExceptionDuration()) {
+    } else if (getTotalDuration(playlist) <= getExceptionDuration(playlistUrl)) {
+        // Do nothing
+    } else if (["ophim", "opstream"].some((keyword) => playlistUrl.hostname.includes(keyword))) {
+        // Run workaround to remove ads
+        console.warn("Ads not found, run workaround...")
+        workaroundRegex ??= await getOphimAdsBlockWorkaroundRegex();
+        playlist = playlist.replaceAll(workaroundRegex, "")
+    } else {
         // Show report button in player
         injectReportButton(playlistUrl);
         console.error("Không tìm thấy quảng cáo");
