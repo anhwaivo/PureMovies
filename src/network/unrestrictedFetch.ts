@@ -52,7 +52,7 @@ export async function unrestrictedFetch(
     const rawUrlString = input instanceof Request ? input.url : input.href;
 
     // Separate the actual URL from the Kodi-style header string.
-    const [requestUrl, kodiHeaderString = ""] = rawUrlString.split("|", 2);
+    const [requestUrl, kodiHeaderString = ""] = rawUrlString.split(/#?\|/, 2);
 
     // Parse the Kodi-style header string.
     const kodiStyleHeaders = kodiHeaderString
