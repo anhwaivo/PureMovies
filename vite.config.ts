@@ -93,12 +93,12 @@ export default defineConfig(({ command }) => ({
             build: {
                 metaFileName: true,
                 externalGlobals: {
-                    "@trim21/gm-fetch": cdn.jsdelivr(
-                        tryCatchWrapper("GM_fetch"),
-                    ),
                     "hls.js": cdn.jsdelivr(tryCatchWrapper("Hls")),
                     "notyf": cdn.jsdelivr(tryCatchWrapper("{Notyf}")),
                     "artplayer": cdn.jsdelivr(tryCatchWrapper("Artplayer")),
+                    "@trim21/gm-fetch": cdn.jsdelivr(
+                        tryCatchWrapper("GM_fetch"),
+                    ),
                 },
             },
             format: {
