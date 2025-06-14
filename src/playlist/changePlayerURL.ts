@@ -1,6 +1,6 @@
 import Hls from "hls.js";
 import { createPlayer, getPlaylistURL, removeAds } from ".";
-import { config, instances } from "../misc/state";
+import { instances } from "../misc/state";
 import { unrestrictedFetch } from "../network";
 import { remoteImport } from "../misc/remoteImport";
 import { createNotification } from "../ui";
@@ -8,18 +8,18 @@ import { createNotification } from "../ui";
 const originalFetch = window.fetch;
 
 window.fetch = function (input, init) {
-    const url = (input as Request).url ?? (input as URL).href ?? input;
-    const hostname = new URL(url).hostname;
+    // const url = (input as Request).url ?? (input as URL).href ?? input;
+    // const hostname = new URL(url).hostname;
 
-    const isNeedToBypass = config.domainBypassWhitelist.every((keyword) =>
-        hostname.includes(keyword) === false
-    );
+    // const isNeedToBypass = config.domainBypassWhitelist.every((keyword) =>
+    //     hostname.includes(keyword) === false
+    // );
 
     const isUsingByHls = ["loadSource", "loadFragment"].some((functionName) =>
         new Error().stack?.includes(functionName)
     );
 
-    if (isNeedToBypass && isUsingByHls) {
+    if (isUsingByHls) {
         return unrestrictedFetch(input, init);
     }
 
