@@ -1,5 +1,51 @@
 import { unrestrictedFetch } from "../network";
 
+async function getPlaylistURLFromNguonC(embedUrl: string | URL, options: RequestInit = {}, retry = 0) {
+    if (retry > 3) {
+        console.warn("Failed to get playlist URL after multiple attempts.");
+        return "";
+    }
+
+    // Parse the input URL
+    embedUrl = new URL(embedUrl);
+    
+    const req = await unrestrictedFetch(embedUrl, options);
+    const raw = await req.text();
+
+    // Try to find the encrypted URL in the response
+    const encryptedURL = raw.match(/(?<=encryptedURL = ").*(?=";)/)?.[0];
+    if (encryptedURL) {
+        const playlistUrl = `conf.php?url=${encodeURIComponent(encryptedURL)}`;
+        return URL.parse(playlistUrl, embedUrl)?.href || "";
+    }
+
+    // Try to find the stream URL in the response
+    const streamURL = raw.match(/(?<=(?:streamURL =|url =|file:) ").*(?="(?:;|,))/)?.[0];
+    if (streamURL) {
+        const playlistUrl = JSON.parse(`"${streamURL}"`);
+        return URL.parse(playlistUrl, embedUrl)?.href || "";
+    }
+
+    // If no URL is found, try to find the encrypted payload and resend the request with it
+    const encryptedPayload = raw.match(/(?<=input.value = ").*(?=";)/)?.[0];
+    if (encryptedPayload) {
+        const optionsWithPayload = {
+            ...options,
+            method: "POST",
+            headers: {
+                ...options.headers,
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `payload=${encodeURIComponent(JSON.parse(`"${encryptedPayload}"`))}`,
+        };
+
+        return getPlaylistURLFromNguonC(embedUrl, optionsWithPayload, retry + 1);
+    }
+
+    // If all above fails, return the embed URL with "get.php" instead of "embed.php"
+    return embedUrl.href.replace("embed.php", "get.php");
+}
+
 export async function getPlaylistURL(embedUrl: string | URL) {
     // Parse the input URL
     embedUrl = new URL(embedUrl);
@@ -19,30 +65,7 @@ export async function getPlaylistURL(embedUrl: string | URL) {
     }
 
     if (embedUrl.hostname.includes("streamc")) {
-        const req = await unrestrictedFetch(embedUrl, {
-            headers: {
-                Referer: embedUrl.origin,
-            },
-        });
-
-        const raw = await req.text();
-
-        // Extract the encrypted URL from the raw response
-        const encryptedURL = raw.match(/(?<=encryptedURL = ").*(?=";)/)?.[0];
-        if (encryptedURL) {
-            const playlistUrl = `conf.php?url=${encodeURIComponent(encryptedURL)}`;
-            return URL.parse(playlistUrl, embedUrl)?.href || "";
-        }
-
-        // If no encrypted URL is found, try to find the stream URL
-        const streamURL = raw.match(/(?<=(?:streamURL =|url =|file:) ").*(?="(?:;|,))/)?.[0];
-        if (streamURL) {
-            const playlistUrl = JSON.parse(`"${streamURL}"`);
-            return URL.parse(playlistUrl, embedUrl)?.href || "";
-        }
-
-        // If all above fails, return the embed URL with "get.php" instead of "embed.php"
-        return embedUrl.href.replace("embed.php", "get.php");
+        return getPlaylistURLFromNguonC(embedUrl);
     }
 
     // For other cases, return the original embed URL
