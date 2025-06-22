@@ -29,10 +29,7 @@ async function getOphimAdsBlockWorkaroundRegex() {
     return new RegExp(regexString, "g");
 }
 
-let workaroundRegex: RegExp | null = null;
-
 export async function removeAds(playlistUrl: string | URL) {
-    // Parse the input URL
     playlistUrl = new URL(playlistUrl);
 
     // Check if its blob representation is already cached
@@ -63,9 +60,8 @@ export async function removeAds(playlistUrl: string | URL) {
 
     // If the content is a master playlist, recursively process its last URI
     if (playlist.includes("#EXT-X-STREAM-INF")) {
-        caches.blob[playlistUrl.href] = await removeAds(
-            playlist.trim().split("\n").slice(-1)[0],
-        );
+        const lastUri = playlist.trim().split("\n").slice(-1)[0];
+        caches.blob[playlistUrl.href] = await removeAds(lastUri);
         return caches.blob[playlistUrl.href];
     }
 
@@ -89,10 +85,10 @@ export async function removeAds(playlistUrl: string | URL) {
     } else if (getTotalDuration(playlist) <= getExceptionDuration(playlistUrl)) {
         // Do nothing
     } else if (["ophim", "opstream"].some((keyword) => playlistUrl.hostname.includes(keyword))) {
-        // Run workaround to remove ads
-        console.warn("Ads not found, run workaround...")
-        workaroundRegex ??= await getOphimAdsBlockWorkaroundRegex();
-        playlist = playlist.replaceAll(workaroundRegex, "")
+        // Run workaround to remove ads (always call, do not cache)
+        console.warn("Ads not found, run workaround...");
+        const workaroundRegex = await getOphimAdsBlockWorkaroundRegex();
+        playlist = playlist.replaceAll(workaroundRegex, "");
     } else {
         // Show report button in player
         injectReportButton(playlistUrl);
