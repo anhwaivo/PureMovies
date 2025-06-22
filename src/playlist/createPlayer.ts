@@ -1,7 +1,10 @@
+// @ts-ignore: Dynamic import or asset
 import logoURL from "../assets/images/logo.svg";
+// @ts-ignore: Dynamic import or asset
 import backwardIconURL from "../assets/icons/backward.svg";
+// @ts-ignore: Dynamic import or asset
 import forwardIconURL from "../assets/icons/forward.svg";
-
+// @ts-ignore: Dynamic import
 import Artplayer from "artplayer";
 import vi from 'artplayer/src/i18n/vi.js';
 
@@ -22,12 +25,11 @@ export async function createPlayer(playlistUrl: string | URL = "") {
             message: "Artplayer not found. Run workaround...",
         });
 
-        // @ts-expect-error
-        window.tmp = await remoteImport(
-            "https://cdn.jsdelivr.net/npm/artplayer",
-            "Artplayer",
+        const imported = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/artplayer"
         );
-        eval("Artplayer = window.tmp;");
+        // @ts-expect-error
+        Artplayer = imported.Artplayer || window.Artplayer;
     }
 
     return new Artplayer({
@@ -59,7 +61,9 @@ export async function createPlayer(playlistUrl: string | URL = "") {
                 html: getSvgMarkupFromDataUrl(backwardIconURL),
                 tooltip: "10 giây trước",
                 click: function () {
+                    // @ts-ignore: Dynamic property from Artplayer instance
                     if (instances.player) {
+                        // @ts-ignore: Artplayer instance property
                         instances.player.seek = this.currentTime - 10;
                     }
                 },
@@ -71,7 +75,9 @@ export async function createPlayer(playlistUrl: string | URL = "") {
                 html: getSvgMarkupFromDataUrl(forwardIconURL),
                 tooltip: "10 giây sau",
                 click: function () {
+                    // @ts-ignore: Dynamic property from Artplayer instance
                     if (instances.player) {
+                        // @ts-ignore: Artplayer instance property
                         instances.player.seek = this.currentTime + 10;
                     }
                 },

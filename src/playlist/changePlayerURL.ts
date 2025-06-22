@@ -1,3 +1,4 @@
+// @ts-ignore: Dynamic import
 import Hls from "hls.js";
 import { createPlayer, getPlaylistURL, removeAds } from ".";
 import { instances } from "../misc/state";
@@ -44,18 +45,18 @@ export async function changePlayerURL(embedUrl: string | URL) {
             message: "Hls not found. Run workaround...",
         });
 
-        // @ts-expect-error
-        window.tmp = await remoteImport(
-            "https://cdn.jsdelivr.net/npm/hls.js",
-            "Hls",
+        const imported = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/hls.js"
         );
-        eval("Hls = window.tmp;");
+        // @ts-expect-error
+        Hls = imported.Hls || window.Hls;
     }
 
     // Change url
     if (Hls.isSupported()) {
         const hls = new Hls({
             progressive: true,
+            // @ts-ignore: Hls fetchSetup context/initParams types
             fetchSetup: function (context, initParams) {
                 const url = `${context.url}#|Referer=${embedUrl}`;
                 return new Request(url, initParams);

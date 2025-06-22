@@ -1,7 +1,4 @@
-export async function remoteImport(
-    scriptURL: string | URL,
-    scriptOutputVariableName?: string,
-) {
+export async function remoteImport(scriptURL: string | URL): Promise<any> {
     try {
         scriptURL = new URL(scriptURL);
 
@@ -16,10 +13,8 @@ export async function remoteImport(
             .join("\n")
             .replaceAll("console.log", "(()=>{})"); // Suppress console.log
 
-        const scriptOutputExport =
-            `; window.${scriptOutputVariableName} ?? ${scriptOutputVariableName};`;
-
-        return eval(scriptContent + scriptOutputExport);
+        const fn = new Function("window", scriptContent + "; return window;");
+        return fn(window);
     } catch (error) {
         console.error(error);
     }
