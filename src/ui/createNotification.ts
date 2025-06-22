@@ -1,8 +1,6 @@
-// @ts-ignore: Dynamic import or asset
 import infoIconURL from "../assets/icons/info.svg";
-// @ts-ignore: Dynamic import or asset
 import warningIconURL from "../assets/icons/warning.svg";
-// @ts-ignore: Dynamic import
+
 import { Notyf } from "notyf";
 import { elements } from "../misc/state";
 import { waitForElement } from ".";
@@ -17,11 +15,12 @@ export async function createNotification() {
     } catch (e) {
         console.warn("Notyf not found. Run workaround...");
 
-        const imported = await remoteImport(
-            "https://cdn.jsdelivr.net/npm/notyf"
-        );
         // @ts-expect-error
-        Notyf = imported.Notyf || window.Notyf;
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/notyf",
+            "Notyf",
+        );
+        eval(`notyf = { Notyf: window.tmp }`);
     }
 
     return new Notyf({

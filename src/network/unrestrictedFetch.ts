@@ -1,4 +1,3 @@
-// @ts-ignore: Dynamic import
 import GM_fetch from "@trim21/gm-fetch";
 import { remoteImport } from "../misc/remoteImport";
 import { createNotification } from "../ui";
@@ -110,11 +109,12 @@ export async function unrestrictedFetch(
             message: "GM_fetch not found. Run workaround...",
         });
 
-        const imported = await remoteImport(
-            "https://cdn.jsdelivr.net/npm/@trim21/gm-fetch"
-        );
         // @ts-expect-error
-        GM_fetch = imported.GM_fetch || window.GM_fetch;
+        window.tmp = await remoteImport(
+            "https://cdn.jsdelivr.net/npm/@trim21/gm-fetch",
+            "GM_fetch",
+        );
+        eval("GM_fetch = window.tmp;");
     }
 
     // Call GM_fetch with the processed URL and merged options/headers.
