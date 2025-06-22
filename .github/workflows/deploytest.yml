@@ -1,0 +1,172 @@
+name: build script with esbuild
+"on":
+    push:
+        branches:
+            - main
+    workflow_dispatch: null
+
+permissions:
+    contents: write
+    pages: write
+    id-token: write
+
+jobs:
+    build:
+        name: Build Vite Project
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v1
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Build project
+              run: bun run build
+              env:
+                  GITHUB_REPOSITORY: "${{ github.repository }}"
+
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: vite-build-output
+                  path: ./dist
+
+    make_script:
+        name: esbuild stuffs
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Download build artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: vite-build-output
+                  path: ./dist
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Install esbuild and stuffs
+              run: |
+                  npm install -g esbuild
+                  sudo apt-get update
+                  sudo apt-get install -y parallel
+
+            - name: Prepare directories
+              run: |
+                  mkdir -p download meta pr-js js release
+
+            - name: Copy userscripts to download/
+              run: |
+                  cp ./dist/*.user.js download/ || true
+
+            - name: split stuffs
+              run: |
+                  for file in download/*.user.js; do
+                    base=$(basename "$file" .user.js)
+                    sed -n '/\/\/ ==UserScript==/,/\/\/ ==\/UserScript==/p' "$file" > "meta/$base.meta.js"
+                    sed -n '/\/\/ ==\/UserScript==/,$p' "$file" | tail -n +2 > "pr-js/$base.js"
+                  done
+
+            - name: Parallel compile js files with esbuild
+              run: |
+                  compile_js() {
+                    local file=$1
+                    base=$(basename "$file" .js)
+                    npx esbuild $file --minify --outfile="js/$base.js"
+                  }
+                  export -f compile_js
+                  parallel -j 8 compile_js ::: pr-js/*.js
+
+            - name: merge meta, check error
+              run: |
+                  mkdir -p release
+                  for file in js/*.js; do
+                    base=$(basename "$file" .js)
+                    userscript_name=$(grep -m 1 -oP '^// @name:en\s+\K.*' "meta/$base.meta.js" || \
+                                     grep -m 1 -oP '^// @name\s+\K.*' "meta/$base.meta.js")
+                    userscript_name=$(echo "$userscript_name" | tr -d '\r\n')
+                    if [[ -z "$userscript_name" ]]; then
+                      echo -e "\e[31mError: Missing \"$base.meta.js\"\e[0m"
+                      rm -f meta/$base.meta.js release/$base.user.js
+                    fi
+                    js_file_content=$(cat "js/$base.js")
+                    js_file_length=${#js_file_content}
+                    if [[ $js_file_length -lt 100 ]]; then
+                      echo -e "\e[31mFailed to convert userscript: \"$userscript_name\"\e[0m"
+                      rm -f meta/$base.meta.js release/$base.user.js
+                    else
+                      cat "meta/$base.meta.js" "js/$base.js" > "release/$base.user.js"
+                      echo -e "Completed to convert userscript: \"$userscript_name\""
+                    fi
+                  done
+
+            - name: Upload and release
+              uses: actions/upload-artifact@v4
+              with:
+                  name: userscript-release
+                  path: release
+
+    prepare_deployment:
+        name: Prepare Deployment Files
+        runs-on: ubuntu-latest
+        needs: build
+        steps:
+            - name: Download build artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: vite-build-output
+                  path: ./dist
+
+            - name: Modify dist for root redirect
+              run: |
+                  if [ -f ./dist/index.html ]; then
+                    mv ./dist/index.html ./dist/app.html
+                    echo "Renamed original index.html to app.html"
+                  fi
+
+                  echo '<!DOCTYPE html>
+                  <html>
+                  <head>
+                    <meta charset="utf-8">
+                    <title>Redirecting...</title>
+                    <link rel="canonical" href="https://github.com/${{ github.repository }}"/>
+                    <meta http-equiv="refresh" content="0; url=https://github.com/${{ github.repository }}">
+                  </head>
+                  <body>
+                  </body>
+                  </html>' > ./dist/index.html
+                  echo "Created redirecting index.html"
+
+            - name: Upload deployment artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: deployment-package
+                  path: ./dist
+
+    deploy:
+        name: Deploy to GitHub Pages
+        runs-on: ubuntu-latest
+        needs: prepare_deployment
+        steps:
+            - name: Download deployment artifact
+              uses: actions/download-artifact@v4
+              with:
+                  name: deployment-package
+                  path: ./dist
+
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                  github_token: "${{ secrets.GITHUB_TOKEN }}"
+                  publish_dir: ./dist
+                  user_name: "github-actions[bot]"
+                  user_email: "github-actions[bot]@users.noreply.github.com"
