@@ -24,6 +24,12 @@ Cuki's PureMovie là một userscript hoàn hảo dành cho những ai yêu thí
 
 &nbsp;
 
+## Credits :D
+
+- [Hth4nh](https://github.com/Hth4nh) : main developer
+- [Fiorenmas](https://github.com/FiorenMas) : script esbuild
+- [Anhwaivo](https://github.com/anhwaivo) : contributor
+
 Nếu bạn thấy hữu ích thì đừng ngại tặng mình 1 star nhé, cảm ơn nhiều <3
 
 ![nyan-cat](https://github.com/user-attachments/assets/88221688-3a36-42c3-a472-1042aee6197e)
